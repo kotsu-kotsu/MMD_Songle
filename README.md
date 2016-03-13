@@ -2,7 +2,7 @@
 [three.js](http://threejs.org/)と[songle API](https://widget.songle.jp/docs/v1)を使ってブラウザでライブするWebアプリ [MMD ☓ Songle](http://kotsu-kotsu.github.io/MMD_Songle/)を作ってみた  
 
 ##使用ライブラリ
-three.jsr74  
+three.js r74  
 songle API  
 jquery
 
