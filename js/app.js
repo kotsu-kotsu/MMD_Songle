@@ -794,7 +794,6 @@ window.onSongleWidgetReady = function(apiKey, songleWidget){
     SW = songleWidget;
     if (latency >= 0){          // モーションと音楽の遅延が正数のときはシークする
         songleWidget.seekTo(latency);
-        songleWidget.volume = 100;
     }
     songleWidget.on("play", function(e){
         $("#load").fadeOut("fast");
@@ -811,7 +810,7 @@ window.onSongleWidgetReady = function(apiKey, songleWidget){
                     songleWidget.volume = 100;
                 }, -1*latency);
             }else{
-                songleWidget.volume = 1;
+                songleWidget.volume = 100;
             }
         }
     });
