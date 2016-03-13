@@ -3,7 +3,7 @@
 
 ##使用ライブラリ
 three.jsr74  
-songle API
+songle API  
 jquery
 
 ##コンセプト
