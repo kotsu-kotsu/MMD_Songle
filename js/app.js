@@ -1,11 +1,14 @@
-//グローバル
+// グローバル
 var mesh, camera, scene, renderer, control;
 var helper;
 var ready = false;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 var clock = new THREE.Clock(false);
-var delta;
+var delta = 0.0;
+var comment_durations = [];
+var renf = false;
+var latency_f = false;
 var musicPlanes = [];
 var musicIdx = [];
 var walls = [];
@@ -17,16 +20,17 @@ var roofs = [];
 var roofCenter;
 var comments = {};
 var comments3D = {};
+var lightCubeMaterial, spotLightbeamMaterial, lightTbeamMaterialG, lightTbeamMaterialW, lightCubeTMaterialG, lightCubeTMaterialW;
 var loader = new THREE.FontLoader();
 var font;
 var song_id, songle_url, comment_data, comment_url, vmd_path, latency, nico_url;
 var song_info = {
-    "umiyuri":{"songle_url":"piapro.jp/t/5BXQ/20140224203011", 
-        "nico_url":"sm22960446", 
-        "comment_data":'<packet><thread thread="1393236346" version="20090904" res_from="-1000"/></packet>', 
-        "comment_url":"http://msg.nicovideo.jp/25/api/", 
-        "vmd_path":"models/vmd/umiyuri.vmd", 
-        "latency":-300}, 
+    "umiyuri":{"songle_url":"piapro.jp/t/5BXQ/20140224203011",      //songle APIにgetするurlパラメータ
+        "nico_url":"sm22960446",        // ニコニコ動画のID
+        "comment_data":'<packet><thread thread="1393236346" version="20090904" res_from="-1000"/></packet>',        // コメントサーバーのスレッド
+        "comment_url":"http://msg.nicovideo.jp/25/api/",            // コメントサーバーのURL
+        "vmd_path":"models/vmd/umiyuri.vmd",            // ダンスモーションのPATH 
+        "latency":-300},            //遅延
     "torinoko":{"songle_url":"piapro.jp/t/Eywb/20100804205216", 
         "nico_url":"sm11559163", 
         "comment_data":'<packet><thread thread="1280404533" version="20090904" res_from="-1000"/></packet>', 
@@ -77,9 +81,7 @@ var song_info = {
         "latency":-200}
 };
 
-
-// 便利関数
-var _ua = (function(u){
+var _ua = (function(u){     //ユーザエージェント判定
     return {
         Tablet:(u.indexOf("windows") != -1 && u.indexOf("touch") != -1 && u.indexOf("tablet pc") == -1) 
             || u.indexOf("ipad") != -1
@@ -99,8 +101,9 @@ var _ua = (function(u){
 if (_ua.Mobile || _ua.Tablet){
     $("#param_acc").prop('checked', true);
 }
-function getRandomSubarray(arr, size) {
-    var shuffled = arr.slice(0), i = arr.length,  min = i - size,  temp,  index;
+
+function getRandomSubarray(arr, size) {     // ランダムに部分リストを作る
+    var shuffled = arr.slice(0), i = arr.length, min = i - size, temp, index;
     while (i-- > min) {
         index = Math.floor((i + 1) * Math.random());
         temp = shuffled[index];
@@ -110,10 +113,11 @@ function getRandomSubarray(arr, size) {
     return shuffled.slice(min);
 }
 
-function getRandomInt(min, max) {
+function getRandomInt(min, max) {       // randInt
     return Math.floor(Math.random() * (max - min)) + min;
 }
-function loadScript(src, callback) {
+
+function loadScript(src, callback) {        // jsの動的ロード
     var done = false;
     var head = document.getElementsByTagName('head')[0];
     var script = document.createElement('script');
@@ -159,7 +163,7 @@ $(document).on("click", ".mmd_set_elm", function(){
     $(this).addClass("select");
 });
 
-//クレジット設定
+// コピーライト
 $(document).on("click", "#copyright_button.off", function(){
     $("#copyright_list").slideDown("fast");
     $(this).removeClass("off").addClass("on");
@@ -200,9 +204,6 @@ $(document).on("click", "#setting_button.on", function(){
     });
     $(this).removeClass("on").addClass("off");
 });
-
-
-
 var param_acc = false;
 var param_stereo = false;
 var param_songle = false;
@@ -246,31 +247,31 @@ $(document).on("click", "#start_button", function(){
     start_MMD();
 });
 
+
 function start_MMD(){
     $("#load").fadeIn("fast", function(){
         $("#top").css("display", "none");
     });
-    // スタート画面
+    // songleの呼び出し
     var element = SongleWidgetAPI.createSongleWidgetElement({
-        api: "songle-widget-api-example",           
+        api: "songle-widget-api-example",          
         url: songle_url, 
         songVolume: 0, 
         songleWidgetSizeW: "auto", 
-        songAutoPlay: false,                         
+        songAutoPlay: false,                        
         songAutoLoop: false                         
     });
     document.getElementById('songle_div').appendChild(element);
-    // 壁の最上ノートを決める．
+    // ヒストグラムの最上ノートを決める．
     for (a=0; a<17; a++){
         max_h = getRandomInt(6, 22);
         max_wall[a] = max_h;
     }
-
-    //コメント
+    //コメントとフォントのロード
     if (param_comment == true){
         var chorus_span = [];
         $.when(
-            $.ajax({
+            $.ajax({        // まずはsongleからサビ区間をgetする
                 type:'GET',
                 url: "https://widget.songle.jp/api/v1/song/chorus.json?url=" + songle_url,
                 dataType: 'json', 
@@ -297,7 +298,7 @@ function start_MMD(){
                     $(xml).find("chat").each(function() {
                         var comment = $(this).text(); //コメントを表示
                         var t = parseInt($(this).attr('vpos')); //vpos(発言時刻)を表示
-                        for (var i in chorus_span){
+                        for (var i in chorus_span){     // サビ区間のコメントのみを保存
                             if (chorus_span[i]["start"] <= t && t <= chorus_span[i]["end"]){
                                 if (comment != ""){
                                     comments[t] = comment;
@@ -305,7 +306,7 @@ function start_MMD(){
                             }
                         }
                     });
-                    loader.load( 'js/07YasashisaGothic_Regular.js',  function ( response ) {
+                    loader.load( 'js/07YasashisaGothic_Regular.js', function ( response ) {     // フォントロードが最も重い(100MBぐらい？？)
                         $("#load_message").text("フォントデータ読み込み中");
                         font = response;
                         init();
@@ -323,8 +324,6 @@ function start_MMD(){
 }
 
 
-var lightCubeMaterial, spotLightbeamMaterial, lightTbeamMaterialG, lightTbeamMaterialW, lightCubeTMaterialG, lightCubeTMaterialW;
-
 function init(){
     // シーン
     scene = new THREE.Scene();
@@ -332,18 +331,18 @@ function init(){
     var ambient = new THREE.AmbientLight( 0x666666 );
     scene.add( ambient );
     var directionalLightA = new THREE.DirectionalLight( 0x908580, 0.6 );
-    directionalLightA.position.set( -50,  15,  30 );
+    directionalLightA.position.set( -50, 15, 30 );
     scene.add( directionalLightA );
     var directionalLightB = new THREE.DirectionalLight( 0x908580, 0.6 );
-    directionalLightB.position.set( 50,  15,  30 );
+    directionalLightB.position.set( 50, 15, 30 );
     scene.add( directionalLightB );
-    // スポットライト
+    // 横スポットライト
     var lightCubeGeometory = new THREE.SphereGeometry(1);
-    lightCubeMaterial = new THREE.MeshBasicMaterial({color: "white"});                  // TODO グローバル
+    lightCubeMaterial = new THREE.MeshBasicMaterial({color: "white"});                  // グローバル
     var lightGeometory = new THREE.CylinderGeometry(1.2, 1, 2, 8, 1, true);
     var lightMaterial = new THREE.MeshBasicMaterial({color: "black", side:THREE.DoubleSide});
     var spotLightbeamGeometory = new THREE.CylinderGeometry(0.8, 8, 130, 32, 1, true);
-    spotLightbeamMaterial = new THREE.MeshBasicMaterial({color: "#86cecb", transparent:true, opacity:0.05, depthWrite:false});              //TODO グローバル
+    spotLightbeamMaterial = new THREE.MeshBasicMaterial({color: "#86cecb", transparent:true, opacity:0.05, depthWrite:false});              // グローバル
     var spotLightbeam = new THREE.Mesh(spotLightbeamGeometory, spotLightbeamMaterial);
     spotLightbeam.position.set(5, 3, -1.8);
     spotLightbeam.rotation.z = 100*Math.PI/180;
@@ -354,7 +353,7 @@ function init(){
     spotLightbeam.rotation.z = 100*Math.PI/180;
     spotLightbeam.rotation.y = -210*Math.PI/180;
     scene.add(spotLightbeam);
-    // スポットライトA
+    // 横スポットライトA
     var lightCube_objectA = new THREE.Mesh(lightCubeGeometory, lightCubeMaterial);
     lightCube_objectA.position.set(-50.3, -8.5, 30.3);
     scene.add(lightCube_objectA);
@@ -367,7 +366,7 @@ function init(){
     spotlightA.position.set(-50, -8.5, 30);
     spotlightA.target.position = new THREE.Vector3(0, 0, 0); 
     scene.add(spotlightA);
-    // スポットライトB
+    // 横スポットライトB
     var lightCube_objectB = new THREE.Mesh(lightCubeGeometory, lightCubeMaterial);
     lightCube_objectB.position.set(50.3, -8.5, 30.3);
     scene.add(lightCube_objectB);
@@ -393,8 +392,9 @@ function init(){
     renderer.domElement.style.zIndex = 2;
     renderer.domElement.style.top = 0;
     document.getElementById('mmd').appendChild(renderer.domElement);
-    // 影の設定 （重いので切る）
+    // 影の設定 （重い）
     if (param_shade == true){
+        // スポットライトA
         renderer.shadowMap.enabled = true;
         directionalLightA.castShadow = true;
         directionalLightA.shadow.mapSize.x = 500;
@@ -403,7 +403,7 @@ function init(){
         directionalLightA.shadow.camera.top = 20;
         directionalLightA.shadow.camera.left = -20;
         directionalLightA.shadow.camera.bottom = -20;
-
+        // スポットライトA
         directionalLightB.castShadow = true;
         directionalLightB.shadow.mapSize.x = 500;
         directionalLightB.shadow.mapSize.y = 500;
@@ -428,13 +428,13 @@ function init(){
         control.maxDistance = 80;
         control.maxPolarAngle = 11*Math.PI/20;
     }
-    // 床（音楽とあわせる）
+    // ステージ（音楽とあわせる）
     var musicGeometry = new THREE.BoxGeometry(5.2, 5.2, 0.1);
     var idx = 0;
     for (var i=0; i<20; i++){
         for (var j=0; j<10; j++){
             var musicMaterial = new THREE.MeshLambertMaterial({color: "white"});
-            musicPlanes[idx] = new THREE.Mesh(musicGeometry, musicMaterial);
+            musicPlanes[idx] = new THREE.Mesh(musicGeometry, musicMaterial);        // グローバル
             musicPlanes[idx].position.set(-53+5.6*i, -10.15, -20+5.6*j);
             musicPlanes[idx].rotation.x = 90 * Math.PI / 180;
             musicPlanes[idx].receiveShadow = true;
@@ -447,17 +447,16 @@ function init(){
     var baseGeometry = new THREE.CubeGeometry(113, 10, 57);
     var baseMaterial = new THREE.MeshLambertMaterial({color: "#181818", side:THREE.DoubleSide});
     var base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.position.set(0, -15.2, 5); // totate,  scale
+    base.position.set(0, -15.2, 5);
     scene.add(base);
-    //ステージ奥
+    //ライブハウス奥壁
     var hallOGeometry = new THREE.PlaneGeometry(130, 50);
     var hallOtexture = THREE.ImageUtils.loadTexture('img/wall_out.png');
     var hallOMaterial = new THREE.MeshLambertMaterial({map:hallOtexture, transparent:true});
     var hallO = new THREE.Mesh(hallOGeometry, hallOMaterial);
     hallO.position.set(0, 4.8, -25);
     scene.add(hallO);
-
-    //観客入り口
+    //ライブハウス入り口壁
     var hallIGeometry = new THREE.PlaneGeometry(130, 50);
     var hallItexture = THREE.ImageUtils.loadTexture('img/wall_in.png');
     var hallIMaterial = new THREE.MeshLambertMaterial({map:hallItexture});
@@ -465,20 +464,19 @@ function init(){
     hallI.position.set(0, 4.8, 65);
     hallI.rotation.y = Math.PI;
     scene.add(hallI);
-
+    //ライブハウスドア
     var doorGeometry = new THREE.PlaneGeometry(20, 25);
     var doortexture = THREE.ImageUtils.loadTexture('img/door.png');
     var doorMaterial = new THREE.MeshLambertMaterial({map: doortexture});
     var door = new THREE.Mesh(doorGeometry, doorMaterial);
-    door.position.set(-35, -8, 64.8); // totate,  scale
+    door.position.set(-35, -8, 64.8);
     door.rotation.y = Math.PI;
     scene.add(door);
     var door = new THREE.Mesh(doorGeometry, doorMaterial);
-    door.position.set(35, -8, 64.8); // totate,  scale
+    door.position.set(35, -8, 64.8);
     door.rotation.y = Math.PI;
     scene.add(door);
-
-    //観客壁
+    //ライブハウス左右壁
     var hallLGeometry = new THREE.PlaneGeometry(90, 50);
     var halltexture = THREE.ImageUtils.loadTexture('img/wall.png');
     var hallLMaterial = new THREE.MeshLambertMaterial({map:halltexture});
@@ -490,14 +488,14 @@ function init(){
     hallR.position.set(65, 4.8, 20);
     hallR.rotation.y = -Math.PI/2;
     scene.add(hallR);
-    //観客天井
+    //ライブハウス天井
     var hallTGeometry = new THREE.PlaneGeometry(130, 90);
     var hallTMaterial = new THREE.MeshLambertMaterial({color: "#2b2b2b"});
     var hallT = new THREE.Mesh(hallTGeometry, hallTMaterial);
     hallT.position.set(0, 29.83, 20);
     hallT.rotation.x = Math.PI/2;
     scene.add(hallT);
-    //観客床
+    //ライブハウス床
     var hallFGeometry = new THREE.PlaneGeometry(130, 90);
     var hallFtexture = THREE.ImageUtils.loadTexture('img/floor.png');
     var hallFMaterial = new THREE.MeshLambertMaterial({map:hallFtexture, side:THREE.DoubleSide});
@@ -533,12 +531,12 @@ function init(){
     // 天井ライト
     var lightTGeometory = new THREE.CylinderGeometry(1.8, 2, 6, 32, 1, true);
     var lightTbeamGeometory = new THREE.CylinderGeometry(1.7, 9, 90, 32, 1, true);
-    lightTbeamMaterialG = new THREE.MeshBasicMaterial({color: "#86cecb", transparent:true, opacity:0.05, depthWrite:false});           //TODO グローバル
-    lightTbeamMaterialW = new THREE.MeshBasicMaterial({color: "white", transparent:true, opacity:0.05, depthWrite:false});             //TODO グローバル
+    lightTbeamMaterialG = new THREE.MeshBasicMaterial({color: "#86cecb", transparent:true, opacity:0.05, depthWrite:false});           //グローバル
+    lightTbeamMaterialW = new THREE.MeshBasicMaterial({color: "white", transparent:true, opacity:0.05, depthWrite:false});             //グローバル
     var lightTMaterial = new THREE.MeshBasicMaterial({color: "black", side:THREE.DoubleSide});
     var lightCubeTGeometory = new THREE.SphereGeometry(1.5);
-    lightCubeTMaterialG = new THREE.MeshBasicMaterial({color: "#86cecb"});              //TODO グローバル
-    lightCubeTMaterialW = new THREE.MeshBasicMaterial({color: "white"});                //TODO グローバル
+    lightCubeTMaterialG = new THREE.MeshBasicMaterial({color: "#86cecb"});              //グローバル
+    lightCubeTMaterialW = new THREE.MeshBasicMaterial({color: "white"});                //グローバル
     for (var i=0;i<3;i++){
         for (var j=0;j<3;j++){
             var lightT = new THREE.Mesh(lightTGeometory, lightTMaterial);
@@ -564,7 +562,6 @@ function init(){
             scene.add(lightCT);
         }
     }
-
     // フロントスピーカー
     var f_speakerGeometry = new THREE.CubeGeometry(6, 3, 5);
     var f_speakerMaterial = new THREE.MeshLambertMaterial({color: "#2b2b2b"});
@@ -577,7 +574,6 @@ function init(){
         fsf.position.set(-30+i*20, -8.55, 32);
         fsf.rotation.x = -Math.PI/12
         scene.add(fsf);
-
         f_speaker.position.set(-30+i*20, -9.2, 29.5);
         f_speaker.rotation.x = -Math.PI/12
         scene.add(f_speaker);
@@ -604,18 +600,17 @@ function init(){
     ssf.rotation.y = -Math.PI/20;
     scene.add(s_speaker);
     scene.add(ssf);
-
-    //壁（音楽と合わせる）
+    //ヒストグラム（音楽と合わせる）
     var r = 55;
     var wallGeometry = new THREE.PlaneGeometry(3, 1);
     for (var a=0; a<17; a++){
-        walls[a] = [];
+        walls[a] = [];      // グローバル
         for (var h=0;h<22;h++){
             var wallMaterial = new THREE.MeshLambertMaterial({color: "hsl(183, 74%, " + (29 + (3*h)) + "%)"});
             if (h < max_wall[a]){
-                var wall = new THREE.Mesh(wallGeometry,  wallMaterial);
+                var wall = new THREE.Mesh(wallGeometry, wallMaterial);
             }else{
-                var wall = new THREE.Mesh(wallGeometry,  wallMaterial);
+                var wall = new THREE.Mesh(wallGeometry, wallMaterial);
                 wall.scale.x = 0.15;
                 wall.scale.y = 0.5;
             }
@@ -625,8 +620,7 @@ function init(){
             scene.add(walls[a][h]);
         }
     }
-
-    // skydome
+    // スカイドーム(宇宙)
     var sky_geometry = new THREE.SphereGeometry(200, 60, 40);  
     var textureLoader = new THREE.TextureLoader();
     var texture = textureLoader.load( "img/sky.jpg" );
@@ -636,23 +630,22 @@ function init(){
     skyBox.rotation.z = 45 * Math.PI / 180;
     skyBox.rotation.y = 45 * Math.PI / 180;
     scene.add(skyBox);  
-
-    //コメント  (重い)再生とともにレンダリングは無理なので予め数百個のコメントをレンダリングして置く（何か工夫できるかも）
+    //コメント  (重い)再生とともにシーンにaddするのは超絶重いなので予め数百個のコメントをレンダリングしておく（何か工夫できるかも）
     if (param_comment == true){
         for (cTime in comments){
             var TextMaterial = new THREE.MeshLambertMaterial( { color: "white"} );
-            var TextGeometry = new THREE.TextGeometry(comments[cTime],  {
-                size: 2,  height: 0.2,  curveSegments: 3, 
-                font: font,  weight: "regular",
+            var TextGeometry = new THREE.TextGeometry(comments[cTime], {
+                size: 2, height: 0.2, curveSegments: 3, 
+                font: font, weight: "regular",
             });
             var c = Math.floor((parseInt(cTime) - 300)/10)*10;
-            comments3D[c] = new THREE.Mesh( TextGeometry,  TextMaterial );
+            comments3D[c] = new THREE.Mesh( TextGeometry, TextMaterial );
             comments3D[c].position.set(55, 2*getRandomInt(0, 10)-5, -2.5*getRandomInt(0, 10)+15);
             comments3D[c].material.visible  = false;
             scene.add( comments3D[c] );
         }
     }
-    // MMDモデル
+    // MMDモデルのロード
     var onProgress = function ( xhr ) {
         if ( xhr.lengthComputable ) {
             var percentComplete = xhr.loaded / xhr.total * 100;
@@ -662,7 +655,7 @@ function init(){
     };
     var onError = function ( xhr ) {
     };
-    var modelFile = 'models/pmd/lat/index.pmd';
+    var modelFile = 'models/pmd/lat/index.pmd';     // TODO モデルの変更（現在対応モデルがあまりない気がする．多分ボーンが違うから？足が動かない）
     var vmdFiles = [ vmd_path ];
     if (param_stereo == true){
         helper = new THREE.MMDHelper(renderer, true);
@@ -670,8 +663,7 @@ function init(){
         helper = new THREE.MMDHelper(renderer, false);
     }
     var loader = new THREE.MMDLoader();
-
-    loader.load( modelFile, vmdFiles, function ( object ) {
+    loader.load( modelFile, vmdFiles, function ( object ) {     // MMDモデル
         mesh = object;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
@@ -686,14 +678,13 @@ function init(){
         scene.add( mesh );
         ready = true;
     }, onProgress, onError );
-
-       
     // 観客
     if (param_kyaku == true){
         var idxs = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5];
         var a = 0;
         for (i=0; i<10; i++){
-            loader.load( "models/pmd/kyaku/kyaku.pmd", ["models/vmd/kyaku/kyaku" + idxs[i] + ".vmd"], function ( object ) {
+            loader.load( "models/pmd/kyaku/kyaku.pmd", ["models/vmd/kyaku/kyaku" + idxs[i] + ".vmd"], function ( object ) {     
+                        //TODO 客のモーションは単調な動きなので繰り返し動かしたい（今はミクのモーションと同じ位長いvmdを使っている）
                 if (a == 5){
                     a += 1;
                 }
@@ -706,24 +697,18 @@ function init(){
             }, onProgress, onError );
         }
     }
-
-    window.addEventListener( 'resize', onWindowResize, false );
+    window.addEventListener( 'resize', onWindowResize, false );     // リサイズ
 };
+
 
 function animate(){
     requestAnimationFrame(animate);
     render();
 };
-
-
-var comment_durations = [];
-var delta = 0.0;
-var renf = false;
-var latency_f = false;
 function render() {
     if (ready) {
         delta = clock.getDelta();
-        skyBox.rotation.y -= 0.0005;
+        skyBox.rotation.y -= 0.0005;        // TODO フレームレートが変わると回転速度も変わってしまう．
         skyBox.rotation.x += 0.0005;
         helper.animate( delta );
         helper.render( scene, camera );
@@ -734,7 +719,7 @@ function render() {
         if (param_songle == true){
             if (_ua.Mobile || _ua.Tablet){
             }else{
-                down_wall();
+                down_wall();                // TODO iPhoneでやると急激に重いので切る
             }
         }
         if (param_comment == true){
@@ -767,7 +752,7 @@ function render() {
 }
 
 var step = 0;
-function down_wall(){       // 壁の各最上ノートを黒にする
+function down_wall(){       // 壁の各最上ノートを黒にする．もうちょっと賢い方法があるはずだけどまあいいか
     for (a=0; a<17; a++){
         max_h = max_wall[a];
         walls[a][max_h].scale.x = 0.15;
@@ -785,7 +770,6 @@ function down_wall(){       // 壁の各最上ノートを黒にする
     }
 }
 
-
 function onWindowResize() {
     windowHalfX = window.innerWidth / 2;
     windowHalfY = window.innerHeight / 2;
@@ -794,10 +778,12 @@ function onWindowResize() {
     renderer.setSize( window.innerWidth, window.innerHeight);
 }
 
+// ライブ終了後
 $(document).on("click", "#reload_button", function(){
     window.location.reload();
 });
 
+// ライブ演出
 var floor_color = 0xffffff;
 var sampleIdx = [];
 var hue, pastel;
@@ -806,8 +792,9 @@ var start_flag = false;
 var chorus_flag = false;
 window.onSongleWidgetReady = function(apiKey, songleWidget){
     SW = songleWidget;
-    if (latency >= 0){
+    if (latency >= 0){          // モーションと音楽の遅延が正数のときはシークする
         songleWidget.seekTo(latency);
+        songleWidget.volume = 100;
     }
     songleWidget.on("play", function(e){
         $("#load").fadeOut("fast");
@@ -819,7 +806,7 @@ window.onSongleWidgetReady = function(apiKey, songleWidget){
             start_flag = false;
             clock.start();
             if (latency < 0){
-                setTimeout(function(){
+                setTimeout(function(){          // モーションと音楽の遅延が負数のときはlatencyだけ待つ
                     songleWidget.seekTo(0);
                     songleWidget.volume = 100;
                 }, -1*latency);
@@ -828,11 +815,11 @@ window.onSongleWidgetReady = function(apiKey, songleWidget){
             }
         }
     });
-    songleWidget.on("pause", function(e){
+    songleWidget.on("pause", function(e){       // 一時停止 TODO 一時停止からの再生で結構バグが出る
         clock.stop();
         $('#songle_div').animate({'top': '-=56px'});
     });
-    songleWidget.on("finish", function(e){
+    songleWidget.on("finish", function(e){      // 曲終了 TODO 本当はセットリスト的に次の曲に繋げたいけど，遅延が面倒なのでパス
         clock.stop();
         $('#songle_div').animate({'top': '-=56px'});
         $('<iframe/>').attr('src', 'http://ext.nicovideo.jp/thumb/' + nico_url)
@@ -842,22 +829,20 @@ window.onSongleWidgetReady = function(apiKey, songleWidget){
         .appendTo("#nico_label");
         $("#end_panel").fadeIn("slow");
     });
-
     if (param_songle == true){
-        songleWidget.on("chordPlay", function(e){
+        songleWidget.on("chordPlay", function(e){       // コード変更されたら床色を変更
             hue = Math.floor(Math.random() * 360);
-            pastel = "hsl(" + hue + ", 100%, 87%)";
+            pastel = "hsl(" + hue + ", 100%, 87%)";     // パステルカラー
             floor_color = new THREE.Color(pastel);
             for (i=0; i<sampleIdx.length; i++){
                 musicPlanes[sampleIdx[i]].material.color.setHex(0xffffff);
             }
-            sampleIdx = getRandomSubarray(musicIdx, 80);
+            sampleIdx = getRandomSubarray(musicIdx, 80);        //TODO ランダムにしないで予め決めとけばもっと軽くなるはず
             for (i=0; i<sampleIdx.length; i++){
                 musicPlanes[sampleIdx[i]].material.color.set(floor_color);
             }
         });
-
-        songleWidget.on("chorusEnter", function(e){
+        songleWidget.on("chorusEnter", function(e){     // サビが変更されたらライトの色を変える
             for (a=0; a<17; a++){
                 for (h=0;h<22;h++){
                     walls[a][h].material.color.set("hsl(330, 76%, " + (52 + h) + "%)");
@@ -871,9 +856,9 @@ window.onSongleWidgetReady = function(apiKey, songleWidget){
             lightCubeTMaterialW.color.set("rgb(225, 40, 133)");
             setTimeout(function(){
                 chorus_flag = true;
-            }, 1000);
+            }, 1000);           // たまにchorusleaveが一瞬で起こることがあるので1秒我慢する
         });
-        songleWidget.on("chorusLeave", function(e){
+        songleWidget.on("chorusLeave", function(e){     // サビが終わったら元に戻す
             if (chorus_flag == true){
                 for (a=0; a<17; a++){
                     for (h=0;h<22;h++){
@@ -891,7 +876,7 @@ window.onSongleWidgetReady = function(apiKey, songleWidget){
         });
         if (_ua.Mobile || _ua.Tablet){
         }else{
-            songleWidget.on("beatPlay", function(e){
+            songleWidget.on("beatPlay", function(e){        // ビートごとにヒストグラムの最上ノートを選びなおす
                 for (a=0; a<17; a++){
                     max_h = getRandomInt(6, 22);
                     max_wall[a] = max_h;
