@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <title>MMD ☓ Songle</title>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/png" href="img/favicon.png?var=20160309">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <link rel="apple-touch-icon" href="img/icon.png">
+        <meta name="viewport" content="initial-scale=1.0">
+        <link href="css/app.css?version=20160309" rel="stylesheet">
+    </head>
+
+    <body>
+        <div id="end_panel">
+            <div id="nico_label"></div>
+            <div id="reload_button">リロード</div>
+        </div>
+        <div id="top">
+            <img src="img/miku.png" id="miku_img"></img>
+            <div id="title">MMD ☓ Songle</div>
+            <div id="start_button">LIVE START</div>
+            <div id="mmd_set">
+                <div id="mmd_set_button" class="off">楽曲</div>
+                <div id="mmd_set_list">
+                    <div class="mmd_set_elm" id="clock_lock">clock lock works（ハチ）</div>
+                    <div class="mmd_set_elm" id="fromytoy">from Y to Y（ジミーサムP）</div>
+                    <div class="mmd_set_elm" id="glow">glow（keeno）</div>
+                    <div class="mmd_set_elm" id="soar">Soar（流星P ）</div>
+                    <div class="mmd_set_elm" id="karakuri">からくりピエロ（40mP）</div>
+                    <div class="mmd_set_elm" id="umiyuri">ウミユリ海底譚（ナブナ）</div>
+                    <div class="mmd_set_elm select" id="torinoko">トリノコシティ（40mP）</div>
+                    <div class="mmd_set_elm" id="lover">裏表ラバーズ（wowaka）</div>
+                    <div class="mmd_set_elm" id="snow_white">白い雪のプリンセスは（のぼる↑）</div>
+                </div>
+            </div>
+            <div id="param">
+                <div id="setting_button" class="off">設定</div>
+                <div id="setting_list">
+                    <div class="set_elm">
+                        <div class="set_name">加速度センサー</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_acc">
+                            <label class="onoffswitch-label" for="param_acc">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="set_elm">
+                        <div class="set_name">2画面表示</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_stereo">
+                            <label class="onoffswitch-label" for="param_stereo">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="set_elm">
+                        <div class="set_name">観客</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_kyaku">
+                            <label class="onoffswitch-label" for="param_kyaku">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="set_elm">
+                        <div class="set_name">特殊演出</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_songle" checked>
+                            <label class="onoffswitch-label" for="param_songle">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="set_elm">
+                        <div class="set_name">コメント表示</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_comment">
+                            <label class="onoffswitch-label" for="param_comment">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="set_elm">
+                        <div class="set_name">影表示</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_shade">
+                            <label class="onoffswitch-label" for="param_shade">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="set_elm">
+                        <div class="set_name">物理演算</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_phisic">
+                            <label class="onoffswitch-label" for="param_phisic">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="set_elm">
+                        <div class="set_name">アンチエイリアス</div>
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="param_anti" checked>
+                            <label class="onoffswitch-label" for="param_anti">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="copyright">
+                <div id="copyright_button" class="off">Copyright</div>
+                <div id="copyright_list">
+                    <div class="copyright_elm"><a href="https://widget.songle.jp/docs/v1">Songle Widget API</a></div>
+                    <div class="copyright_elm"><a href="https://bowlroll.net/file/30199">Lat式ミク(モデル)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/5BXQ">ウミユリ海底譚(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm28351516">ウミユリ海底譚(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/NXYR">裏表ラバーズ(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm15356537">裏表ラバーズ(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/eECL">from Y to Y(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm18641673">from Y to Y(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/cjYw">Soar(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm16392687?via=thumb_watch">Soar(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/JpQ4">clock lock works(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm24267899">Soar(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/Eywb">トリノコシティ(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm13612000">トリノコシティ(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/lcNu">glow(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm27098405">glow(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/nmoi">からくりピエロ(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm18722559">からくりピエロ(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://piapro.jp/t/F80E">白い雪のプリンセスは(piapro)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm18058920">白い雪のプリンセスは(モーション)</a></div>
+                    <div class="copyright_elm"><a href="http://seiga.nicovideo.jp/seiga/im2912697">スマホ(アクセサリ)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm17006140">トイレのピクトさん(モデル)</a></div>
+                    <div class="copyright_elm"><a href="http://www.nicovideo.jp/watch/sm25724251">観客モーション</a></div>
+                    <div class="copyright_elm"><a href="http://haikeisozai.mangalog.com/tex/texcon1">コンクリート(テクスチャ)</a></div>
+                    <div class="copyright_elm"><a href="http://www.howtousearchicad.com/?p=935">コンクリート(テクスチャ)</a></div>
+                    <div class="copyright_elm"><a href="http://free-texture-site.blogspot.com/2010/10/free-painted-wood-door-texture.html">ドア(テクスチャ)</a></div>
+
+
+                </div>
+            </div>
+        </div>
+        <div id="load">
+            <div id="load_message">初期化中</div>
+            <div id="load_atention">
+                <div id="aten_top">注意!!</div>
+                <ul style="font-size:0.8em; padding-left:2em;">
+                    <li>加速度センサーをお使いの場合は端末を落としたり周囲にぶつからないようにしてください．<b>破損・怪我をした際の責任は負いかねます</b>のでご了承ください．</li>
+                    <li>設定によって端末に高負荷がかかり，電池を消費することが考えられます．<b>電池残量にご注意ください．</b></li>
+                    <li>ライブ中に端末の画面が暗くなるかもしれません．端末の設定で<b>バックライト設定を変更することをお勧めします．</b></li>
+                    <li>ネットワークの環境によってはモーションと音源が合わないことがあります．<b>高速回線（WiFi）を使うことをお勧めします．</b></li>
+                    <li>MMDのモデルデータなど，比較的大きいサイズのデータの通信が発生します．<b>3G, 4G/LTE回線をお使いの際には通信速度制限にお気をつけ下さい．</b>通信料金に関する責任は負いかねますのでご了承ください．</li>
+                    <li>AdBlockなどJavaScriptを制限する拡張機能をお使いの場合，プログラムが動作しない場合がございます．</li>
+                    <li>動作は<b>GoogleChrome(PC)とmobile safari(iOS)</b>を前提に作成しています．</li>
+                </ul>
+            </div>
+        </div>
+        <div id="footer">
+            <div id="songle_div"></div>
+        </div>
+        <div id="mmd"></div>
+        <script src="https://widget.songle.jp/v1/api.js"></script>
+        <script src="js/jquery-2.2.0.min.js"></script>
+        <script src="js/three.min.js"></script>
+        <script src="js/utils/GeometryUtils.js"></script>
+        <script src="js/libs/charsetencoder.min.js"></script>
+        <script src="js/libs/ammo.js"></script>
+        <script src="js/libs/stats.min.js"></script>
+        <script src="js/loaders/TGALoader.js"></script>
+        <script src="js/loaders/MMDLoader.js"></script>
+        <script src="js/animation/CCDIKSolver.js"></script>
+        <script src="js/animation/MMDPhysics.js"></script>
+        <script src="js/Detector.js"></script>
+        <script src="js/controls/DeviceOrientationControls.js"></script>
+        <script src="js/controls/OrbitControls.js"></script>
+        <script src="js/app.js?version=20160309"></script>
+    </body>
+</html>

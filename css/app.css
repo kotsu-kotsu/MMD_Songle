@@ -1,0 +1,269 @@
+.onoffswitch {
+    position: relative; width: 90px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+    left:calc(100% - 100px);
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #999999; border-radius: 20px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 30px; padding: 0; line-height: 30px;
+    font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "ON";
+    padding-left: 10px;
+    background-color: #34A7C1; color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    content: "OFF";
+    padding-right: 10px;
+    background-color: #EEEEEE; color: #999999;
+    text-align: right;
+}
+.onoffswitch-switch {
+    display: block; width: 18px; margin: 6px;
+    background: #FFFFFF;
+    position: absolute; top: 0; bottom: 0;
+    right: 56px;
+    border: 2px solid #999999; border-radius: 20px;
+    transition: all 0.3s ease-in 0s; 
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+}
+
+html{
+}
+body{
+    font-family:  "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "游ゴシック", YuGothic, "メイリオ", Meiryo, sans-serif;
+    margin:0px;
+    overflow:hidden;
+}
+#songle_div{
+    position:relative;
+    top:0px;
+}
+#footer{
+    height:100px;
+    overflow:hidden;
+    margin:0px;
+    position:absolute;
+    left:0px;
+    top: calc(100% - 100px);
+    text-align:center;
+    width:100%;
+    z-index:0;
+}
+/*ロード画面*/
+    #load{
+        display:none;
+        position:absolute;
+        background: #137a7f;
+        height:100%;
+        width:100%;
+        z-index:7;
+        min-width:320px;
+        text-align:center;
+    }
+    #load_message{
+        top:20px;
+        color:#fffeec;
+        font-size:1em;
+        position:relative;
+        width:300px;
+        left:calc(50% - 150px);
+    }
+    #load_atention{
+        top:20px;
+        overflow:scroll;
+        position:relative;
+        padding:5px;
+        background:white;
+        height:calc(100% - 180px);
+        width:280px;
+        border:solid 5px #e12885;
+        border-radius: 10px;
+        left:calc(50% - 150px);
+    }
+    #aten_top{
+        font-size:2em;
+        font-weight:bold;
+        color:#e12885;
+        border-bottom:solid #e12885 5px;
+    }
+/*エンド画面*/
+    #end_panel{
+        display:none;
+        position:absolute;
+        background:#c3e5e7;
+        height:100%;
+        width:100%;
+        z-index:20;
+        min-width:320px;
+        overflow:hidden;
+    }
+    #nico_label{
+        position:relative;
+        top:20px;
+        left:calc(50% - 150px);
+    }
+    #reload_button{
+        cursor:pointer;
+        position:relative;
+        top:40px;
+        width:300px;
+        left:calc(50% - 150px);
+        background:#e12885;
+        font-weight:bold;
+        text-align:center;
+        color:#fffeec;
+        font-size:1.5em;
+        border-radius:5px;
+    }
+/*トップ画面*/
+    #top{
+        position:absolute;
+        background:#c3e5e7;
+        height:100%;
+        width:100%;
+        z-index:5;
+        min-width:320px;
+        overflow:hidden;
+    }
+    #miku_img{
+        position:absolute;
+        height:6em;
+        left:calc(95% - 4em);
+        top:5px;
+    }
+    #title{
+        font-size:2.2em;
+        margin-top:50px;
+        position:relative;
+        font-weight:bold;
+        color:#e12885;
+        height:1.5em;
+        width:90%;
+        left:5%;
+        text-align:center;
+        border-bottom:solid 5px #e12885;
+    }
+    #start_button{
+        cursor:pointer;
+        position:relative;
+        top:20px;
+        width:300px;
+        left:calc(50% - 150px);
+        background:#e12885;
+        font-weight:bold;
+        text-align:center;
+        color:#fffeec;
+        font-size:1.5em;
+        border-radius:5px;
+    }
+/*楽曲選択*/
+    #mmd_set{
+        position:absolute;
+        top:180px;
+        width:300px;
+        height:100%;
+        left:calc(50% - 150px);
+    }
+    #mmd_set_list{
+        display:none;
+        background:#fffeec;
+        border-radius:0px 0px 5px 5px;
+        height:calc(100% - 13.5em);
+        max-height:20em;
+        overflow:scroll;
+    }
+    #mmd_set_button{
+        cursor:pointer;
+        text-align:center;
+        color:#fffeec;
+        background:#34A7C1;
+    }
+    .mmd_set_elm{
+        padding:2px;
+        padding-left:10px;
+        position:relative;
+        cursor:pointer;
+    }
+    .mmd_set_elm:hover{
+        background:#e12885;
+        color:#fffeec;
+    }
+    .mmd_set_elm.select{
+        background:#e12885;
+        color:#fffeec;
+    }
+/*パラメータ設定*/
+    #param{
+        position:absolute;
+        top:220px;
+        width:300px;
+        height:100%;
+        left:calc(50% - 150px);
+    }
+    #setting_list{
+        display:none;
+        background:#fffeec;
+        border-radius:0px 0px 5px 5px;
+        height:calc(100% - 16em);
+        max-height:20em;
+        overflow:scroll;
+    }
+    #setting_button{
+        cursor:pointer;
+        text-align:center;
+        color:#fffeec;
+        background:#34A7C1;
+    }
+    .set_elm{
+        padding:3px;
+        position:relative;
+    }
+    .set_name{
+        position:absolute;
+        padding:5px;
+    }
+/*コピーライト*/
+    #copyright{
+        position:absolute;
+        top:260px;
+        width:300px;
+        height:100%;
+        left:calc(50% - 150px);
+    }
+    #copyright_button{
+        cursor:pointer;
+        text-align:center;
+        color:#fffeec;
+        background:#34A7C1;
+    }
+    #copyright_list{
+        display:none;
+        background:#fffeec;
+        border-radius:0px 0px 5px 5px;
+        height:calc(100% - 18.5em);
+        max-height:20em;
+        overflow:scroll;
+    }
+    .copyright_elm{
+        padding-left:10px;
+        position:relative;
+        font-size:0.6em;
+    }
