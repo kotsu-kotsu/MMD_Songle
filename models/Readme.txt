@@ -19,6 +19,3 @@ If you want to use the model/motion/audio data for them,
 you must look for the data which the author EXPLICITLY allows for them.
 
 DON'T judge as it's allowed if it isn't mentioned.
-
-
-Takahiro
