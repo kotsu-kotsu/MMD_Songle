@@ -3928,10 +3928,11 @@ THREE.MMDAudioManager.prototype = {
 
 };
 
-THREE.MMDHelper = function ( renderer, sp ) {
+THREE.MMDHelper = function ( renderer, sp, diff_sight) {
 
 	this.renderer = renderer;
     this.sp = sp;       // ステレオエフェクトを使うかどうか  trueならステレオ
+    this.diff_sight = diff_sight;
 
 	this.meshes = [];
 
@@ -3955,6 +3956,7 @@ THREE.MMDHelper.prototype = {
 	init: function () {
         this.stereo = new THREE.StereoCamera();
         this.stereo.aspect = 0.5;
+        this.stereo.eyeSep = this.diff_sight;
 		this.initRender();
 	},
 
@@ -4274,16 +4276,16 @@ THREE.MMDHelper.prototype = {
             this.renderer.setScissor( 0, 0, size.width / 2, size.height );
             this.renderer.setViewport( 0, 0, size.width / 2, size.height );
             this.renderMain( scene, this.stereo.cameraL );
-            if ( this.doOutlineDrawing ) {
+            //if ( this.doOutlineDrawing ) {
                 //this.renderOutline( scene, this.stereo.cameraL );
-            }
+            //}
             // 右カメラ
             this.renderer.setScissor( size.width / 2, 0, size.width / 2, size.height );
             this.renderer.setViewport( size.width / 2, 0, size.width / 2, size.height );
             this.renderMain( scene, this.stereo.cameraR );
-            if ( this.doOutlineDrawing ) {
+            //if ( this.doOutlineDrawing ) {
                 //this.renderOutline( scene, this.stereo.cameraR );
-            }
+            //}
 
             // workaround until I make IK and Physics Animation plugin
             for ( var i = 0; i < this.meshes.length; i++ ) {

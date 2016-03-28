@@ -81,6 +81,9 @@ var song_info = {
         "latency":-200}
 };
 
+
+
+
 var _ua = (function(u){     //ユーザエージェント判定
     return {
         Tablet:(u.indexOf("windows") != -1 && u.indexOf("touch") != -1 && u.indexOf("tablet pc") == -1) 
@@ -204,6 +207,9 @@ $(document).on("click", "#setting_button.on", function(){
     });
     $(this).removeClass("on").addClass("off");
 });
+$(document).on("change", "#diff_sight", function(){
+    $("#diff_name").text("視差:"+$(this).val());
+});
 var param_acc = false;
 var param_stereo = false;
 var param_songle = false;
@@ -212,7 +218,9 @@ var param_shade = false;
 var param_phisic = false;
 var param_anti = false;
 var param_kyaku = false;
+var param_sight = 0.0;
 $(document).on("click", "#start_button", function(){
+    param_sight = parseFloat($("#diff_sight").val());
     if($("#param_acc:checked").val()){
         param_acc = true;
     }
@@ -658,9 +666,9 @@ function init(){
     var modelFile = 'models/pmd/lat/index.pmd';     // TODO モデルの変更（現在対応モデルがあまりない気がする．多分ボーンが違うから？足が動かない）
     var vmdFiles = [ vmd_path ];
     if (param_stereo == true){
-        helper = new THREE.MMDHelper(renderer, true);
+        helper = new THREE.MMDHelper(renderer, true, param_sight);
     }else{
-        helper = new THREE.MMDHelper(renderer, false);
+        helper = new THREE.MMDHelper(renderer, false, param_sight);
     }
     var loader = new THREE.MMDLoader();
     loader.load( modelFile, vmdFiles, function ( object ) {     // MMDモデル
@@ -777,6 +785,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight);
 }
+
 
 // ライブ終了後
 $(document).on("click", "#reload_button", function(){
